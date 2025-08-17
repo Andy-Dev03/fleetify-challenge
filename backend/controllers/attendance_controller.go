@@ -85,22 +85,26 @@ func GetAttendanceLogs(c *gin.Context) {
 			deptName = "-"
 		}
 
-		// Tentukan status absensi
+		// Tentukan status absensi dengan switch
 		description := history.Description
-		if history.AttendanceType == 1 { // Clock In
+		switch history.AttendanceType {
+		case 1: // Clock In
 			maxIn := history.Employee.Department.MaxClockInTime
 			if clockIn != "" && clockIn <= maxIn {
 				description = "On Time (Check-in)"
 			} else if clockIn != "" {
 				description = "Late (Check-in)"
 			}
-		} else if history.AttendanceType == 2 { // Clock Out
+		case 2: // Clock Out
 			maxOut := history.Employee.Department.MaxClockOutTime
 			if clockOut != "" && clockOut >= maxOut {
 				description = "On Time (Check-out)"
 			} else if clockOut != "" {
 				description = "Early Leave"
 			}
+		default:
+			description = "Unknown Attendance Type"
+
 		}
 
 		logs = append(logs, AttendanceLogResp{
@@ -120,7 +124,7 @@ func GetAttendanceLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": logs})
 }
 
-// CreateAttendance membuat data absensi baru (clock in)
+// CreateAttendance
 func CreateAttendance(c *gin.Context) {
 	var input struct {
 		EmployeeID string `form:"employee_id" json:"employee_id"`
